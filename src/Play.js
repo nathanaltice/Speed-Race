@@ -9,6 +9,8 @@ class Play extends Phaser.Scene {
         this.load.image('car_white', 'car_white_posterized.png');
         this.load.image('dashboard', 'dashboard.png');
         this.load.image('car_cop', 'car_cop_posterized.png');
+
+        this.load.audio('horn', ['car_horn.mp3']);
     }
 
     create() {
@@ -16,22 +18,34 @@ class Play extends Phaser.Scene {
         this.physics.world.bounds.setTo(game.config.width/4, 0, game.config.width/2, game.config.height);
         this.physics.world.setBoundsCollision(true, true, false, false); // check left and right, not up or down
 
+        // scrolling background
         this.background = this.add.tileSprite(centerX, 0, game.config.width, game.config.height, 'bg_road').setOrigin(0.5, 0);
+        
+        // player car
         this.playerCar = this.physics.add.sprite(centerX, game.config.height/5*4, 'car_white');
         this.playerCar.setDebugBodyColor(0xFACADE);
         this.playerCar.setCollideWorldBounds(true);
         this.playerCar.setImmovable(true);
 
+        // 
         this.copCar = this.physics.add.sprite(centerX, 0, 'car_cop');
         this.copCar.setBounce(1);
         this.copCar.setMaxVelocity(maxCarVelocity);
         this.copCar.setCollideWorldBounds(true);
         this.copCar.setVelocity(50, 200);
 
+        // dashboard UI
         this.dashboard = this.add.image(centerX, game.config.height + 100, 'dashboard').setOrigin(0.5, 1);
 
         // text
-        text = this.add.text(10, 30, '', { font: '14px Courier', fill: '#ffffff' });
+        debugText = this.add.text(10, 30, '', { font: '14px Courier', fill: '#ffffff' });
+        this.scoreText = this.add.text(centerX, 64, score, {
+            font: '48px Courier',
+            fill: '#FFFFFF'
+        }).setOrigin(0.5);
+
+        //
+        this.bButtonNotPressedLastFrame = true;
     }
 
     update() {
@@ -41,7 +55,8 @@ class Play extends Phaser.Scene {
         // clear debug array
         let debug = [];
 
-        // get gamepads
+        // get gamepads (maximum: 4)
+        // https://photonstorm.github.io/phaser3-docs/Phaser.Input.Gamepad.GamepadPlugin.html
         let pads = this.input.gamepad.gamepads;
         // let pads = this.input.gamepad.getAll();
         // let pads = navigator.getGamepads();
@@ -103,6 +118,17 @@ class Play extends Phaser.Scene {
             }
             // push buttons string to debug array
             debug.push(buttons);
+
+            // car honk 🦆
+            // buttons have no justPressed() method, so we have to track single presses w/ booleans
+            if (pad.isButtonDown(0)) {
+                if(this.bButtonNotPressedLastFrame) {
+                    this.sound.play('horn', { volume: 0.5 });
+                }
+                this.bButtonNotPressedLastFrame = false;
+            } else {
+                this.bButtonNotPressedLastFrame = true;
+            }
     
             // store gamepad axes to string
             let axes = '';
@@ -126,7 +152,7 @@ class Play extends Phaser.Scene {
             debug.push(axes);
             debug.push('');
 
-            // player car input
+            // player car physics & input
             this.playerCar.body.setDragX(carAcceleration/2);
 
             // handle D-pad control
@@ -162,6 +188,11 @@ class Play extends Phaser.Scene {
         this.physics.collide(this.playerCar, this.copCar);
         
         // print debug text (uncomment if you want to see gamepad info)
-        //text.setText(debug);
+        //debugText.setText(debug);
+
+        // update and display score
+        score += scrollSpeed / 10000;
+        let scoreDisplay = Phaser.Math.RoundTo(score, -2);
+        this.scoreText.text = scoreDisplay;
     }
 }
