@@ -10,6 +10,7 @@
 "use strict";
 
 var config = {
+    parent: 'phaser-game',  // for info text
     type: Phaser.WEBGL,
     width: 480,
     height: 960,
@@ -20,7 +21,7 @@ var config = {
         }
     },
     input: {
-        gamepad: true
+        gamepad: true       // let's use gamepads
     },
     scene: [ Play ]
 };

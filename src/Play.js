@@ -27,7 +27,7 @@ class Play extends Phaser.Scene {
         this.playerCar.setCollideWorldBounds(true);
         this.playerCar.setImmovable(true);
 
-        // 
+        // cop car
         this.copCar = this.physics.add.sprite(centerX, 0, 'car_cop');
         this.copCar.setBounce(1);
         this.copCar.setMaxVelocity(maxCarVelocity);
@@ -44,13 +44,16 @@ class Play extends Phaser.Scene {
             fill: '#FFFFFF'
         }).setOrigin(0.5);
 
-        //
-        this.bButtonNotPressedLastFrame = true;
+        // buttons have no justPressed() method, so we have to track single presses w/ booleans
+        this.bButtonNotPressedLastFrame = true;        
     }
 
     update() {
         // no update unless a gamepad is present
-        //if (this.input.gamepad.total === 0) { return; }
+        if (this.input.gamepad.total === 0) { 
+            document.getElementById('info').innerHTML = "Please connect gamepad and press a button.";
+            return; 
+        }
     
         // clear debug array
         let debug = [];
@@ -165,6 +168,18 @@ class Play extends Phaser.Scene {
                 this.playerCar.body.setAccelerationX(carAcceleration * axisHorizontal);
             }
 
+            // rumble support is non-standard and experimental
+            // see: https://developer.mozilla.org/en-US/docs/Web/API/GamepadHapticActuator
+            // pad.vibration.reset();       // uncomment if your pad won't stop rumblin'
+            if (this.playerCar.body.blocked.left || this.playerCar.body.blocked.right) {
+                pad.vibration.playEffect('dual-rumble', {
+                    startDelay: 0,        // delay (ms) before effect starts
+                    duration: 10,           // duration (ms) of effect
+                    weakMagnitude: 1.0,     // rumble intensity of high-frequency (weak) motors 0.0-1.0
+                    strongMagnitude: 0.5    // rumble intensity of low-frequency (strong) motors 0.0-1.0
+                });
+            }
+
             // update R2 value property
             this.R2value = pad.buttons[7].value;
             this.L2value = pad.buttons[6].value;
@@ -194,5 +209,8 @@ class Play extends Phaser.Scene {
         score += scrollSpeed / 10000;
         let scoreDisplay = Phaser.Math.RoundTo(score, -2);
         this.scoreText.text = scoreDisplay;
+
+        // update info text
+        document.getElementById('info').innerHTML = "Left stick: steer | R2: accelerate | L2: Brake | B: HONK";
     }
 }
