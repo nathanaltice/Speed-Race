@@ -1,6 +1,6 @@
 // Nathan Altice
 // Created: 3/28/23
-// Updated: 1/13/24
+// Updated: 1/16/26
 // Phaser 3 gamepad example inspired by Taito's Speed Race (1974)
 // Portions of code adapted from official Phaser 3 gamepad examples w/ new comments added
 // Car sprites adapted from tokka's Top Down Cars Sprite Pack 1.0: https://tokka.itch.io/top-down-car

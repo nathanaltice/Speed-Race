@@ -88,23 +88,23 @@ class Play extends Phaser.Scene {
                 Button values vary in value from 0 (not pressed) to 1 (on)
                 Analog buttons return 0–1 range
                 NOTE: Button assignments tested on 8BitDo Pro 2!
-                B0: B
-                B1: A
-                B2: Y
+                B0: A
+                B1: B
+                B2: 
                 B3: X
-                B4: L (shoulder)
-                B5: R (shoulder)
-                B6: L2 (shoulder) | analog
-                B7: R2 (shoulder) | analog
-                B8: select
-                B9: start
-                B10: left stick down
-                B11: right stick down
-                B12: D-pad up
-                B13: D-pad down
-                B14: left
-                B15: right
-                B16: special button
+                B4: Y
+                B5: 
+                B6: L
+                B7: R
+                B8: L2
+                B9: R2
+                B10: Select
+                B11: Start
+                B12: 
+                B13: L3 (depress stick))
+                B14: R3
+                B15: 
+                B16: 
             */
             // loop through each button on the current gamepad
             for (let b = 0; b < pad.buttons.length; b++) {
@@ -125,7 +125,7 @@ class Play extends Phaser.Scene {
 
             // car honk 🦆
             // buttons have no justPressed() method, so we have to track single presses w/ booleans
-            if (pad.isButtonDown(0)) {
+            if (pad.isButtonDown(1)) {
                 if(this.bButtonNotPressedLastFrame) {
                     this.sound.play('horn', { volume: 0.5 })
                 }
@@ -142,7 +142,7 @@ class Play extends Phaser.Scene {
                 Axis 0: left stick  | left  (-1) / right (1)
                 Axis 1: left stick  | up    (-1) / down  (1)
                 Axis 2: right stick | left  (-1) / right (1)
-                Axis 3: right stick | up    (-1) / down  (1)
+                Axis 5: right stick | up    (-1) / down  (1)
             */
             // loop through each axis on the current gamepad
             for (let a = 0; a < pad.axes.length; a++) {
@@ -169,24 +169,12 @@ class Play extends Phaser.Scene {
                 this.playerCar.body.setAccelerationX(carAcceleration * axisHorizontal)
             }
 
-            // rumble support is non-standard and experimental
-            // see: https://developer.mozilla.org/en-US/docs/Web/API/GamepadHapticActuator
-            // pad.vibration.reset()       // uncomment if your pad won't stop rumblin'
-            // if (this.playerCar.body.blocked.left || this.playerCar.body.blocked.right) {
-            //     pad.vibration.playEffect('dual-rumble', {
-            //         startDelay: 0,        // delay (ms) before effect starts
-            //         duration: 10,           // duration (ms) of effect
-            //         weakMagnitude: 1.0,     // rumble intensity of high-frequency (weak) motors 0.0-1.0
-            //         strongMagnitude: 0.5    // rumble intensity of low-frequency (strong) motors 0.0-1.0
-            //     })
-            // }
-
-            // update R2 value property
-            this.R2value = pad.buttons[7].value
-            this.L2value = pad.buttons[6].value
+            // update L2/R2 value property
+            this.L2value = pad.buttons[8].value
+            this.R2value = pad.buttons[9].value
         }
 
-        // use R2/L2 for gas/brake by changing tile sprite scroll speed
+        // use L2/R2 for brake/gas by changing tile sprite scroll speed
         if (scrollSpeed >= 0) {
             scrollSpeed -= 0.1     // allows car to coast to a stop with no player input
             if (this.L2value > 0) {
@@ -204,7 +192,7 @@ class Play extends Phaser.Scene {
         this.physics.collide(this.playerCar, this.copCar)
         
         // print debug text (uncomment if you want to see gamepad info)
-        debugText.setText(debug)
+        //debugText.setText(debug)
 
         // update and display score
         score += scrollSpeed / 10000
